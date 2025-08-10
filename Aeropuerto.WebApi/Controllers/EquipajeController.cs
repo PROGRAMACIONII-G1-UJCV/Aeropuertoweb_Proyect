@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Aeropuerto.DataContext.SqlServer1;
+using Aeropuerto.EntityModels;
 
 namespace Aeropuerto.WebApi.Controllers
 {

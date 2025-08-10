@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using AeropuertoModelos = Aeropuerto.EntityModels;
 using Microsoft.EntityFrameworkCore;
 
-// Cambia el namespace para evitar conflictos
+
 namespace Aeropuerto.DataContext.SqlServer1;    
 
 public partial class AeropuertoDataContext : DbContext
@@ -16,25 +17,31 @@ public partial class AeropuertoDataContext : DbContext
     {
     }
 
-    public virtual DbSet<Aerolinea> Aerolineas { get; set; }
+    public virtual DbSet<AeropuertoModelos.Aerolinea> Aerolineas { get; set; }
 
-    public virtual DbSet<EntityModels.Aeropuerto> Aeropuertos { get; set; } // Cambiado para usar el tipo correcto
 
-    public virtual DbSet<Avione> Aviones { get; set; }
 
-    public virtual DbSet<Boleto> Boletos { get; set; }
+    public virtual DbSet<AeropuertoModelos.Aeropuerto> Aeropuertos { get; set; }
 
-    public virtual DbSet<Empleado> Empleados { get; set; }
 
-    public virtual DbSet<Equipaje> Equipajes { get; set; }
 
-    public virtual DbSet<Mantenimiento> Mantenimientos { get; set; }
+    // Cambiado para usar el tipo correcto
 
-    public virtual DbSet<Pasajero> Pasajeros { get; set; }
+    public virtual DbSet<AeropuertoModelos.Avione> Aviones { get; set; }
 
-    public virtual DbSet<PuertasEmbarque> PuertasEmbarques { get; set; }
+    public virtual DbSet<AeropuertoModelos.Boleto> Boletos { get; set; }
 
-    public virtual DbSet<Vuelo> Vuelos { get; set; }
+    public virtual DbSet<AeropuertoModelos.Empleado> Empleados { get; set; }
+
+    public virtual DbSet<AeropuertoModelos.Equipaje> Equipajes { get; set; }
+
+    public virtual DbSet<AeropuertoModelos.Mantenimiento> Mantenimientos { get; set; }
+
+    public virtual DbSet<AeropuertoModelos.Pasajero> Pasajeros { get; set; }
+
+    public virtual DbSet<AeropuertoModelos.PuertasEmbarque> PuertasEmbarques { get; set; }
+
+    public virtual DbSet<AeropuertoModelos.Vuelo> Vuelos { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -42,14 +49,14 @@ public partial class AeropuertoDataContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Aerolinea>(entity =>
+        modelBuilder.Entity<AeropuertoModelos.Aerolinea>(entity =>
         {
             entity.HasKey(e => e.IdAerolinea).HasName("PK__Aeroline__FE89E8DFBAC0D327");
 
             entity.Property(e => e.Estado).HasDefaultValue(true);
         });
 
-        modelBuilder.Entity<Aeropuerto>(entity =>
+        modelBuilder.Entity<AeropuertoModelos.Aeropuerto>(entity =>
         {
             entity.HasKey(e => e.IdAeropuerto).HasName("PK__Aeropuer__02A32F6949587344");
 
@@ -57,7 +64,7 @@ public partial class AeropuertoDataContext : DbContext
             entity.Property(e => e.CodigoIcao).IsFixedLength();
         });
 
-        modelBuilder.Entity<Avione>(entity =>
+        modelBuilder.Entity<AeropuertoModelos.Avione>(entity =>
         {
             entity.HasKey(e => e.IdAvion).HasName("PK__Aviones__5CBC7B3FD215AC42");
 
@@ -66,7 +73,7 @@ public partial class AeropuertoDataContext : DbContext
             entity.HasOne(d => d.IdAerolineaNavigation).WithMany(p => p.Aviones).HasConstraintName("FK__Aviones__IdAerol__45F365D3");
         });
 
-        modelBuilder.Entity<Boleto>(entity =>
+        modelBuilder.Entity<AeropuertoModelos.Boleto>(entity =>
         {
             entity.HasKey(e => e.IdBoleto).HasName("PK__Boletos__362F6EA043CF5C6C");
 
@@ -79,7 +86,7 @@ public partial class AeropuertoDataContext : DbContext
                 .HasConstraintName("FK__Boletos__IdVuelo__628FA481");
         });
 
-        modelBuilder.Entity<Empleado>(entity =>
+        modelBuilder.Entity<AeropuertoModelos.Empleado>(entity =>
         {
             entity.HasKey(e => e.IdEmpleado).HasName("PK__Empleado__CE6D8B9E93BB1E16");
 
@@ -88,7 +95,7 @@ public partial class AeropuertoDataContext : DbContext
             entity.HasOne(d => d.IdAeropuertoNavigation).WithMany(p => p.Empleados).HasConstraintName("FK__Empleados__IdAer__4CA06362");
         });
 
-        modelBuilder.Entity<Equipaje>(entity =>
+        modelBuilder.Entity<AeropuertoModelos.Equipaje>(entity =>
         {
             entity.HasKey(e => e.IdEquipaje).HasName("PK__Equipaje__B0A41322D395F3E5");
 
@@ -97,7 +104,7 @@ public partial class AeropuertoDataContext : DbContext
                 .HasConstraintName("FK__Equipaje__IdBole__6E01572D");
         });
 
-        modelBuilder.Entity<Mantenimiento>(entity =>
+        modelBuilder.Entity<AeropuertoModelos.Mantenimiento>(entity =>
         {
             entity.HasKey(e => e.IdMantenimiento).HasName("PK__Mantenim__DD1C4417650CD784");
 
@@ -106,14 +113,14 @@ public partial class AeropuertoDataContext : DbContext
                 .HasConstraintName("FK__Mantenimi__IdAvi__73BA3083");
         });
 
-        modelBuilder.Entity<Pasajero>(entity =>
+        modelBuilder.Entity<AeropuertoModelos.Pasajero>(entity =>
         {
             entity.HasKey(e => e.IdPasajero).HasName("PK__Pasajero__78E232CBBC02B8EB");
 
             entity.Property(e => e.Estado).HasDefaultValue(true);
         });
 
-        modelBuilder.Entity<PuertasEmbarque>(entity =>
+        modelBuilder.Entity<AeropuertoModelos.PuertasEmbarque>(entity =>
         {
             entity.HasKey(e => e.IdPuerta).HasName("PK__PuertasE__4A275A431F9DA628");
 
@@ -122,7 +129,7 @@ public partial class AeropuertoDataContext : DbContext
                 .HasConstraintName("FK__PuertasEm__IdAer__68487DD7");
         });
 
-        modelBuilder.Entity<Vuelo>(entity =>
+        modelBuilder.Entity<AeropuertoModelos.Vuelo>(entity =>
         {
             entity.HasKey(e => e.IdVuelo).HasName("PK__Vuelos__2176172606195BF2");
 
