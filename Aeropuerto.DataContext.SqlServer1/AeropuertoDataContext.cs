@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace Aeropuerto.EntityModels;
+// Cambia el namespace para evitar conflictos
+namespace Aeropuerto.DataContext.SqlServer1;    
 
 public partial class AeropuertoDataContext : DbContext
 {
@@ -17,7 +18,7 @@ public partial class AeropuertoDataContext : DbContext
 
     public virtual DbSet<Aerolinea> Aerolineas { get; set; }
 
-    public virtual DbSet<Aeropuerto> Aeropuertos { get; set; }
+    public virtual DbSet<EntityModels.Aeropuerto> Aeropuertos { get; set; } // Cambiado para usar el tipo correcto
 
     public virtual DbSet<Avione> Aviones { get; set; }
 

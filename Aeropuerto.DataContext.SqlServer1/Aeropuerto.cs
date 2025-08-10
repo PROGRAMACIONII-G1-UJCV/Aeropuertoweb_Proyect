@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Aeropuerto.EntityModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace Aeropuerto.EntityModels;
+namespace Aeropuerto.DataContext.SqlServer1;
 
 public partial class Aeropuerto
 {
