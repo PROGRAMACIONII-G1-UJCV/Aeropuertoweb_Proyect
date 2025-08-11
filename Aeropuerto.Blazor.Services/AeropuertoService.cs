@@ -1,13 +1,12 @@
 ﻿using System.Net.Http.Json;
-using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Aeropuerto.EntityModels; // Para registrar el namespace
-using ModeloAeropuerto = Aeropuerto.EntityModels.Aeropuerto; // Alias para evitar conflicto
+using Aeropuerto.EntityModels;
+using ModeloAeropuerto = Aeropuerto.EntityModels.Aeropuerto;
 
 namespace Aeropuerto.Blazor.Services
 {
-    public class AeropuertoService
+    public class AeropuertoService : IAeropuertoService
     {
         private readonly HttpClient _http;
 
@@ -21,9 +20,31 @@ namespace Aeropuerto.Blazor.Services
             return await _http.GetFromJsonAsync<List<ModeloAeropuerto>>("api/aeropuerto");
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<ModeloAeropuerto?> GetByIdAsync(int id)
         {
-            await _http.DeleteAsync($"api/aeropuerto/{id}");
+            return await _http.GetFromJsonAsync<ModeloAeropuerto>($"api/aeropuerto/{id}");
+        }
+
+        public async Task<ModeloAeropuerto?> CreateAsync(ModeloAeropuerto aeropuerto)
+        {
+            var response = await _http.PostAsJsonAsync("api/aeropuerto", aeropuerto);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<ModeloAeropuerto>();
+            }
+            return null;
+        }
+
+        public async Task<ModeloAeropuerto?> UpdateAsync(int id, ModeloAeropuerto aeropuerto)
+        {
+            var response = await _http.PutAsJsonAsync($"api/aeropuerto/{id}", aeropuerto);
+            return response.IsSuccessStatusCode ? aeropuerto : null;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var response = await _http.DeleteAsync($"api/aeropuerto/{id}");
+            return response.IsSuccessStatusCode;
         }
     }
 }

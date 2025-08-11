@@ -1,11 +1,10 @@
-using Aeropuerto.Blazor.Components;
+﻿using Aeropuerto.Blazor.Components;
 using Aeropuerto.Blazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddHttpClient<AeropuertoService>(client =>
+builder.Services.AddHttpClient<IAeropuertoService, AeropuertoService>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:5155/");
+    client.BaseAddress = new Uri("https://localhost:7163/"); // Ajusta el puerto según tu WebAPI
 })
 .ConfigurePrimaryHttpMessageHandler(() =>
 {
@@ -14,6 +13,8 @@ builder.Services.AddHttpClient<AeropuertoService>(client =>
         ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
     };
 });
+
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
