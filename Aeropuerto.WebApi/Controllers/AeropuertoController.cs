@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Aeropuerto.DataContext.SqlServer1;
 using Aeropuerto.EntityModels;
-using AeropuertoModelos = Aeropuerto.EntityModels;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace Aeropuerto.WebApi.Controllers
 {
@@ -10,64 +8,80 @@ namespace Aeropuerto.WebApi.Controllers
     [Route("api/[controller]")]
     public class AeropuertoController : ControllerBase
     {
-        private readonly AeropuertoDataContext _context;
+        private readonly AeropuertoContext _context;
 
-        public AeropuertoController(AeropuertoDataContext context)
+        public AeropuertoController(AeropuertoContext context)
         {
             _context = context;
         }
 
+        // GET: api/Aeropuerto
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var aeropuertos = _context.Aeropuertos.ToList();
+            var aeropuertos = await _context.Aeropuertos.ToListAsync();
             return Ok(aeropuertos);
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        // GET: api/Aeropuerto/5
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            var aeropuerto = _context.Aeropuertos.Find(id);
+            var aeropuerto = await _context.Aeropuertos.FindAsync(id);
             if (aeropuerto == null)
-                return NotFound();
+                return NotFound(new { message = $"Aeropuerto con ID {id} no encontrado." });
+
             return Ok(aeropuerto);
         }
 
+        // POST: api/Aeropuerto
         [HttpPost]
-
-        public IActionResult Create([FromBody] AeropuertoModelos.Aeropuerto aeropuerto)
-
-
+        public async Task<IActionResult> Create([FromBody] Aeropuerto.EntityModels.Aeropuerto aeropuerto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             _context.Aeropuertos.Add(aeropuerto);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetById), new { id = aeropuerto.IdAeropuerto }, aeropuerto);
         }
 
-        [HttpPut("{id}")]
-
-
-        public IActionResult Update(int id, [FromBody] AeropuertoModelos.Aeropuerto aeropuerto)
-
-
+        // PUT: api/Aeropuerto/5
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Aeropuerto.EntityModels.Aeropuerto aeropuerto)
         {
             if (id != aeropuerto.IdAeropuerto)
-                return BadRequest();
+                return BadRequest(new { message = "El ID de la URL no coincide con el ID del objeto." });
 
-            _context.Aeropuertos.Update(aeropuerto);
-            _context.SaveChanges();
+            _context.Entry(aeropuerto).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Aeropuertos.Any(e => e.IdAeropuerto == id))
+                    return NotFound(new { message = $"Aeropuerto con ID {id} no existe." });
+
+                throw;
+            }
+
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        // DELETE: api/Aeropuerto/5
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            var aeropuerto = _context.Aeropuertos.Find(id);
+            var aeropuerto = await _context.Aeropuertos.FindAsync(id);
             if (aeropuerto == null)
-                return NotFound();
+                return NotFound(new { message = $"Aeropuerto con ID {id} no encontrado." });
 
             _context.Aeropuertos.Remove(aeropuerto);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+
             return NoContent();
         }
     }

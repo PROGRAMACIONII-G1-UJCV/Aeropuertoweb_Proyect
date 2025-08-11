@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -13,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Aeropuerto.Blazor.Services\Aeropuerto.Blazor.Services.csproj" />
     <ProjectReference Include="..\Aeropuerto.DataContext.SqlServer1\Aeropuerto.DataContext.SqlServer1.csproj" />
-    <ProjectReference Include="..\Aeropuerto.EntityModels.SqlServer\Aeropuerto.EntityModels.SqlServer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

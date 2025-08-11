@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Aeropuerto.DataContext.SqlServer1;
 using Aeropuerto.EntityModels;
 
 namespace Aeropuerto.WebApi.Controllers
@@ -8,9 +7,9 @@ namespace Aeropuerto.WebApi.Controllers
     [Route("api/[controller]")]
     public class EquipajeController : ControllerBase
     {
-        private readonly AeropuertoDataContext _context;
+        private readonly AeropuertoContext _context;
 
-        public EquipajeController(AeropuertoDataContext context)
+        public EquipajeController(AeropuertoContext context)
         {
             _context = context;
         }

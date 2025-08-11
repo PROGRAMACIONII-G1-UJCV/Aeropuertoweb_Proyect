@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Aeropuerto.EntityModels.SqlServer\Aeropuerto.EntityModels.SqlServer.csproj" />
+    <ProjectReference Include="..\Aeropuerto.DataContext.SqlServer1\Aeropuerto.DataContext.SqlServer1.csproj" />
   </ItemGroup>
 
 </Project>

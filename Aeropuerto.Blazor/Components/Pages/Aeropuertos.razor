@@ -1,0 +1,60 @@
+﻿@page "/aeropuertos"
+@inject AeropuertoService aeropuertoService
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Lista de Aeropuertos</h3>
+
+@if (aeropuertos == null)
+{
+    <p>Cargando...</p>
+}
+else if (!aeropuertos.Any())
+{
+    <p>No hay aeropuertos registrados.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Ciudad</th>
+                <th>País</th>
+                <th>Código IATA</th>
+                <th>Código ICAO</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in aeropuertos)
+            {
+                <tr>
+                    <td>@a.Nombre</td>
+                    <td>@a.Ciudad</td>
+                    <td>@a.Pais</td>
+                    <td>@a.CodigoIata</td>
+                    <td>@a.CodigoIcao</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => Eliminar(a.IdAeropuerto)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Aeropuerto> aeropuertos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        aeropuertos = await aeropuertoService.GetAllAsync();
+    }
+
+    private async Task Eliminar(int id)
+    {
+        await aeropuertoService.DeleteAsync(id);
+        aeropuertos = await aeropuertoService.GetAllAsync();
+    }
+}
