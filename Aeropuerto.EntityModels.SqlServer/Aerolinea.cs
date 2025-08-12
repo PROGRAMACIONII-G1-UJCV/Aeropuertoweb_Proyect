@@ -37,7 +37,8 @@ public partial class Aerolinea
     [Unicode(false)]
     public string? Direccion { get; set; }
 
-    public bool? Estado { get; set; }
+    public bool Estado { get; set; } = true;
+
 
     [InverseProperty("IdAerolineaNavigation")]
     public virtual ICollection<Avione> Aviones { get; set; } = new List<Avione>();

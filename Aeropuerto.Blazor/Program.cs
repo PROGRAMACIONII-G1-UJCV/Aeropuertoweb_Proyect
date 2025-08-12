@@ -9,6 +9,11 @@ builder.Services.AddHttpClient<IAeropuertoService, AeropuertoService>(client =>
 
 
 });
+builder.Services.AddHttpClient<AerolineaService, AerolineaService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7163/"); // Asegúrate que coincida con tu WebAPI
+});
+
 
 
 
