@@ -3,16 +3,25 @@ using Aeropuerto.Blazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClient<IAeropuertoService, AeropuertoService>(client =>
+
+builder.Services.AddScoped(sp => new HttpClient
 {
-    client.BaseAddress = new Uri("https://localhost:7163/");
-
-
+    BaseAddress = new Uri("https://localhost:7163") 
 });
+
+
 builder.Services.AddHttpClient<AerolineaService, AerolineaService>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:7163/"); // Asegúrate que coincida con tu WebAPI
 });
+// Configura HttpClient con la base de la API
+//builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+
+// ✅ REGISTRO DE SERVICIOS PERSONALIZADOS
+builder.Services.AddScoped<IAeropuertoService, AeropuertoService>();
+builder.Services.AddScoped<IAvionService, AvionService>(); // 
+builder.Services.AddScoped<IAerolineaService, AerolineaService>(); 
+
 
 
 

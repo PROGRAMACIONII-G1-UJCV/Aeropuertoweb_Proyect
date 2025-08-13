@@ -1,0 +1,105 @@
+﻿@page "/aviones"
+@using Aeropuerto.EntityModels
+@using Aeropuerto.Blazor.Services
+@inject IAvionService AvionService
+
+
+<h3>Gestión de Aviones</h3>
+
+<button class="btn btn-primary mb-3" @onclick="NuevoAvion">Nuevo Avión</button>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Modelo</th>
+            <th>Fabricante</th>
+            <th>Capacidad</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in aviones)
+        {
+            <tr>
+                <td>@a.Modelo</td>
+                <td>@a.Capacidad</td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" @onclick="() => Editar(a)">Editar</button>
+                        <button class="btn btn-outline-danger" @onclick="() => ConfirmarEliminar(a)">Eliminar</button>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (mostrarFormulario)
+{
+    <EditForm Model="avionActual" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+        <div class="mb-2">
+            <label>Modelo:</label>
+            <InputText class="form-control" @bind-Value="avionActual.Modelo" />
+        </div>
+        <div class="mb-2">
+            <label>Capacidad:</label>
+            <InputNumber class="form-control" @bind-Value="avionActual.Capacidad" />
+        </div>
+        <button class="btn btn-success" type="submit">Guardar</button>
+        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </EditForm>
+}
+
+@code {
+    List<Avione> aviones = new();
+    Avione avionActual = new();
+    bool mostrarFormulario = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        aviones = await AvionService.GetAllAsync();
+    }
+
+    void NuevoAvion()
+    {
+        avionActual = new();
+        mostrarFormulario = true;
+    }
+
+    void Editar(Avione avion)
+    {
+        avionActual = new Avione
+        {
+            IdAvion = avion.IdAvion,
+            Modelo = avion.Modelo,
+            Capacidad = avion.Capacidad
+        };
+        mostrarFormulario = true;
+    }
+
+    async Task Guardar()
+    {
+        bool ok;
+        if (avionActual.IdAvion == 0)
+            ok = await AvionService.CreateAsync(avionActual);
+        else
+            ok = await AvionService.UpdateAsync(avionActual);
+
+        if (ok)
+        {
+            aviones = await AvionService.GetAllAsync();
+            mostrarFormulario = false;
+        }
+    }
+
+    void Cancelar() => mostrarFormulario = false;
+
+    async Task ConfirmarEliminar(Avione avion)
+    {
+        if (await AvionService.DeleteAsync(avion.IdAvion))
+        {
+            aviones = await AvionService.GetAllAsync();
+        }
+    }
+}

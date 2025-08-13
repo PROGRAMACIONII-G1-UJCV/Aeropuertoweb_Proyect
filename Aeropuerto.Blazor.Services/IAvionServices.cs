@@ -7,13 +7,12 @@ using System.Threading.Tasks;
 
 namespace Aeropuerto.Blazor.Services
 {
-    public interface IAerolineaService
+    public interface IAvionService
     {
-        Task<List<Aerolinea>> GetAllAsync();
-        Task<Aerolinea?> GetByIdAsync(int id);
-        Task<bool> CreateAsync(Aerolinea aerolinea);
-        Task<bool> UpdateAsync(Aerolinea aerolinea);
+        Task<List<Avione>> GetAllAsync();
+        Task<Avione?> GetByIdAsync(int id);
+        Task<bool> CreateAsync(Avione avion);
+        Task<bool> UpdateAsync(Avione avion);
         Task<bool> DeleteAsync(int id);
-
     }
 }

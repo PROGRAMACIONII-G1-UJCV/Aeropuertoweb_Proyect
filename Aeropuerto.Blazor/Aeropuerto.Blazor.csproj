@@ -10,6 +10,7 @@
     <ProjectReference Include="..\Aeropuerto.Blazor.Services\Aeropuerto.Blazor.Services.csproj" />
     <ProjectReference Include="..\Aeropuerto.DataContext.SqlServer1\Aeropuerto.DataContext.SqlServer1.csproj" />
     <ProjectReference Include="..\Aeropuerto.EntityModels.SqlServer\Aeropuerto.EntityModels.SqlServer.csproj" />
+    <ProjectReference Include="..\Aeropuerto.WebApi\Aeropuerto.WebApi.csproj" />
   </ItemGroup>
 
 </Project>

@@ -17,7 +17,7 @@ namespace Aeropuerto.Blazor.Services
 
         public async Task<List<ModeloAeropuerto>> GetAllAsync()
         {
-            return await _http.GetFromJsonAsync<List<ModeloAeropuerto>>("api/aeropuerto");
+            return await _http.GetFromJsonAsync<List<ModeloAeropuerto>>("api/aeropuerto") ?? new();
         }
 
         public async Task<ModeloAeropuerto?> GetByIdAsync(int id)
@@ -28,17 +28,13 @@ namespace Aeropuerto.Blazor.Services
         public async Task<ModeloAeropuerto?> CreateAsync(ModeloAeropuerto aeropuerto)
         {
             var response = await _http.PostAsJsonAsync("api/aeropuerto", aeropuerto);
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<ModeloAeropuerto>();
-            }
-            return null;
+            return await response.Content.ReadFromJsonAsync<ModeloAeropuerto>();
         }
 
         public async Task<ModeloAeropuerto?> UpdateAsync(int id, ModeloAeropuerto aeropuerto)
         {
             var response = await _http.PutAsJsonAsync($"api/aeropuerto/{id}", aeropuerto);
-            return response.IsSuccessStatusCode ? aeropuerto : null;
+            return await response.Content.ReadFromJsonAsync<ModeloAeropuerto>();
         }
 
         public async Task<bool> DeleteAsync(int id)

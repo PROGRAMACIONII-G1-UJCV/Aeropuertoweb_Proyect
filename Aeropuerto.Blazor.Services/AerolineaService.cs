@@ -1,8 +1,10 @@
 ﻿// Services/AerolineaService.cs
-using System.Net.Http.Json;
+using Aeropuerto.Blazor.Services;
 using Aeropuerto.EntityModels;
+using System.Net.Http.Json;
 
-public class AerolineaService
+public class AerolineaService : IAerolineaService
+
 {
     private readonly HttpClient _http;
 

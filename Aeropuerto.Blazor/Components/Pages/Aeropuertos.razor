@@ -1,60 +1,244 @@
-﻿@page "/aeropuertos"
+﻿@page "/aeropuertos" 
 @inject IAeropuertoService aeropuertoService
 @using Aeropuerto.Blazor.Services
 @using Aeropuerto.EntityModels
 
-<h3>Lista de Aeropuertos</h3>
 
-@if (aeropuertos == null)
+<h3 class="mb-3">Aeropuertos</h3>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="input-group w-auto">
+        <span class="input-group-text">Buscar</span>
+        <input class="form-control" placeholder="Nombre, ciudad o país..." @bind="Filtro" />
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary" @onclick="Nuevo">Nuevo aeropuerto</button>
+        <button class="btn btn-outline-secondary" @onclick="CargarAsync">Recargar</button>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Mensaje))
 {
-    <p>Cargando...</p>
+    <div class="alert alert-info py-2 mb-3">@Mensaje</div>
 }
-else if (!aeropuertos.Any())
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Ciudad</th>
+                            <th>País</th>
+                            <th>IATA</th>
+                            <th>ICAO</th>
+                            <th style="width:160px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (listaPaginada.Any())
+                        {
+                            @foreach (var a in listaPaginada)
+                            {
+                                <tr>
+                                    <td>@a.Nombre</td>
+                                    <td>@a.Ciudad</td>
+                                    <td>@a.Pais</td>
+                                    <td>@a.CodigoIata</td>
+                                    <td>@a.CodigoIcao</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button class="btn btn-outline-primary" @onclick="() => Editar(a)">Editar</button>
+                                            <button class="btn btn-outline-danger" @onclick="() => ConfirmarEliminar(a)">Eliminar</button>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">Sin resultados</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center align-items-center mt-3">
+            <button class="btn btn-sm btn-outline-secondary me-2" @onclick="AnteriorPagina" disabled="@(!PuedeRetroceder)">«</button>
+            <span>Página @paginaActual de @totalPaginas</span>
+            <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="SiguientePagina" disabled="@(!PuedeAvanzar)">»</button>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                @(editando ? "Editar aeropuerto" : "Nuevo aeropuerto")
+            </div>
+            <div class="card-body">
+                <EditForm Model="modelo" OnValidSubmit="GuardarAsync">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="mb-2">
+                        <label class="form-label">Nombre</label>
+                        <InputText class="form-control" @bind-Value="modelo.Nombre" required />
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">Ciudad</label>
+                        <InputText class="form-control" @bind-Value="modelo.Ciudad" required />
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">País</label>
+                        <InputText class="form-control" @bind-Value="modelo.Pais" required />
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">Código IATA</label>
+                        <InputText class="form-control" @bind-Value="modelo.CodigoIata" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Código ICAO</label>
+                        <InputText class="form-control" @bind-Value="modelo.CodigoIcao" />
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                        <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (aEliminar is not null)
 {
-    <p>No hay aeropuertos registrados.</p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Ciudad</th>
-                <th>País</th>
-                <th>Código IATA</th>
-                <th>Código ICAO</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var a in aeropuertos)
-            {
-                <tr>
-                    <td>@a.Nombre</td>
-                    <td>@a.Ciudad</td>
-                    <td>@a.Pais</td>
-                    <td>@a.CodigoIata</td>
-                    <td>@a.CodigoIcao</td>
-                    <td>
-                        <button class="btn btn-danger" @onclick="() => Eliminar(a.IdAeropuerto)">Eliminar</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,.4);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Confirmar eliminación</h5></div>
+                <div class="modal-body">
+                    ¿Eliminar el aeropuerto "<strong>@aEliminar.Nombre</strong>"?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="() => aEliminar = null">Cancelar</button>
+                    <button class="btn btn-danger" @onclick="EliminarAsync">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 @code {
-    private List<Aeropuerto> aeropuertos;
+    private List<Aeropuerto> aeropuertos = new();
+    private Aeropuerto modelo = new();
+    private Aeropuerto? aEliminar;
+    private string Filtro = string.Empty;
+    private string Mensaje;
+    private bool editando = false;
+
+    private int paginaActual = 1;
+    private int registrosPorPagina = 10;
+
+    private IEnumerable<Aeropuerto> listaFiltrada => string.IsNullOrWhiteSpace(Filtro)
+        ? aeropuertos
+        : aeropuertos.Where(a =>
+            (a.Nombre?.Contains(Filtro, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            (a.Ciudad?.Contains(Filtro, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            (a.Pais?.Contains(Filtro, StringComparison.OrdinalIgnoreCase) ?? false));
+
+    private IEnumerable<Aeropuerto> listaPaginada =>
+        listaFiltrada
+            .Skip((paginaActual - 1) * registrosPorPagina)
+            .Take(registrosPorPagina);
+
+    private int totalPaginas => (int)Math.Ceiling(listaFiltrada.Count() / (double)registrosPorPagina);
+    private bool PuedeAvanzar => paginaActual < totalPaginas;
+    private bool PuedeRetroceder => paginaActual > 1;
 
     protected override async Task OnInitializedAsync()
     {
-        aeropuertos = await aeropuertoService.GetAllAsync();
+        await CargarAsync();
     }
 
-    private async Task Eliminar(int id)
+    private async Task CargarAsync()
     {
-        await aeropuertoService.DeleteAsync(id);
         aeropuertos = await aeropuertoService.GetAllAsync();
+        paginaActual = 1;
+        Mensaje = $"Se cargaron {aeropuertos.Count} aeropuertos.";
+    }
+
+    private void Nuevo()
+    {
+        modelo = new Aeropuerto();
+        editando = false;
+    }
+
+    private void Editar(Aeropuerto a)
+    {
+        modelo = new Aeropuerto
+        {
+            IdAeropuerto = a.IdAeropuerto,
+            Nombre = a.Nombre,
+            Ciudad = a.Ciudad,
+            Pais = a.Pais,
+            CodigoIata = a.CodigoIata,
+            CodigoIcao = a.CodigoIcao
+        };
+        editando = true;
+    }
+
+    private void Cancelar()
+    {
+        modelo = new Aeropuerto();
+        editando = false;
+    }
+
+    private async Task GuardarAsync()
+    {
+        if (editando)
+            await aeropuertoService.UpdateAsync(modelo.IdAeropuerto, modelo);
+        else
+            await aeropuertoService.CreateAsync(modelo);
+
+        await CargarAsync();
+        Cancelar();
+        Mensaje = "Aeropuerto guardado correctamente.";
+    }
+
+    private void ConfirmarEliminar(Aeropuerto a)
+    {
+        aEliminar = a;
+    }
+
+    private async Task EliminarAsync()
+    {
+        if (aEliminar is not null)
+        {
+            await aeropuertoService.DeleteAsync(aEliminar.IdAeropuerto);
+            aEliminar = null;
+            await CargarAsync();
+            Mensaje = "Aeropuerto eliminado correctamente.";
+        }
+    }
+
+    private void SiguientePagina()
+    {
+        if (PuedeAvanzar) paginaActual++;
+    }
+
+    private void AnteriorPagina()
+    {
+        if (PuedeRetroceder) paginaActual--;
     }
 }

@@ -39,7 +39,7 @@ namespace Aeropuerto.WebApi.Controllers
 
         // POST: api/aeropuerto
         [HttpPost]
-        [ProducesResponseType(201, Type = typeof(Aeropuerto.EntityModels.Aeropuerto))]
+        [ProducesResponseType(200, Type = typeof(Aeropuerto.EntityModels.Aeropuerto))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> Create([FromBody] Aeropuerto.EntityModels.Aeropuerto aeropuerto)
         {
@@ -84,7 +84,7 @@ namespace Aeropuerto.WebApi.Controllers
                 throw;
             }
 
-            return NoContent();
+            return Ok(aeropuerto);
         }
 
         // DELETE: api/aeropuerto/{id}
@@ -102,7 +102,7 @@ namespace Aeropuerto.WebApi.Controllers
             _context.Aeropuertos.Remove(aeropuerto);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(aeropuerto);
         }
     }
 }
