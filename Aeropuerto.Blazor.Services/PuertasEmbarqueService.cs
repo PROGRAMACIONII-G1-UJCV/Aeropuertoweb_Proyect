@@ -1,13 +1,13 @@
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using Aeropuerto.EntityModels;
 
 namespace Aeropuerto.Blazor.Services;
 
-public class PuertasEmbarqueService : IPuertasEmbarqueService
+public class PuertasEmbarqueServices : IPuertasEmbarqueService
 {
     private readonly HttpClient _http;
 
-    public PuertasEmbarqueService(HttpClient http)
+    public PuertasEmbarqueServices(HttpClient http)
     {
         _http = http;
     }

@@ -1,0 +1,152 @@
+﻿@page "/empleados"
+@inject IEmpleadoService EmpleadoService
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Gestión de Empleados</h3>
+
+<button class="btn btn-primary mb-3" @onclick="Nuevo">Nuevo Empleado</button>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Edad</th>
+            <th>Cargo</th>
+            <th>Fecha Ingreso</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in empleados)
+        {
+            <tr>
+                <td>@e.Nombre</td>
+                <td>@e.Apellido</td>
+                <td>@e.Edad</td>
+                <td>@e.Cargo</td>
+                <td>@e.FechaIngreso.ToString("yyyy-MM-dd")</td>
+                <td>@e.Email</td>
+                <td>@e.Telefono</td>
+                <td>@(e.Estado == true ? "Activo" : "Inactivo")</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" @onclick="() => Editar(e)">Editar</button>
+                    <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(e.IdEmpleado)">Eliminar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (mostrarFormulario)
+{
+    <EditForm Model="empleadoActual" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+        <div class="mb-2">
+            <label>Nombre:</label>
+            <InputText class="form-control" @bind-Value="empleadoActual.Nombre" />
+        </div>
+        <div class="mb-2">
+            <label>Apellido:</label>
+            <InputText class="form-control" @bind-Value="empleadoActual.Apellido" />
+        </div>
+        <div class="mb-2">
+            <label>Edad:</label>
+            <InputNumber class="form-control" @bind-Value="empleadoActual.Edad" />
+        </div>
+        <div class="mb-2">
+            <label>Cargo:</label>
+            <InputText class="form-control" @bind-Value="empleadoActual.Cargo" />
+        </div>
+        <div class="mb-2">
+            <label>Fecha Ingreso:</label>
+            <InputDate class="form-control" @bind-Value="fechaIngreso" />
+        </div>
+        <div class="mb-2">
+            <label>Email:</label>
+            <InputText class="form-control" @bind-Value="empleadoActual.Email" />
+        </div>
+        <div class="mb-2">
+            <label>Teléfono:</label>
+            <InputText class="form-control" @bind-Value="empleadoActual.Telefono" />
+        </div>
+        <div class="mb-2">
+            <label>Estado:</label>
+            <InputCheckbox class="form-check-input" @bind-Value="estadoBool" />
+        </div>
+        <button class="btn btn-success" type="submit">Guardar</button>
+        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </EditForm>
+}
+
+@code {
+    List<Empleado> empleados = new();
+    Empleado empleadoActual = new();
+    bool mostrarFormulario = false;
+    DateTime fechaIngreso = DateTime.Today;
+    bool estadoBool = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        empleados = await EmpleadoService.GetAllAsync();
+    }
+
+    void Nuevo()
+    {
+        empleadoActual = new Empleado();
+        fechaIngreso = DateTime.Today;
+        estadoBool = true;
+        mostrarFormulario = true;
+    }
+
+    void Editar(Empleado e)
+    {
+        empleadoActual = new Empleado
+        {
+            IdEmpleado = e.IdEmpleado,
+            Nombre = e.Nombre,
+            Apellido = e.Apellido,
+            Edad = e.Edad,
+            Cargo = e.Cargo,
+            FechaIngreso = e.FechaIngreso,
+            Email = e.Email,
+            Telefono = e.Telefono,
+            Estado = e.Estado,
+            IdAeropuerto = e.IdAeropuerto
+        };
+
+        fechaIngreso = new DateTime(e.FechaIngreso.Year, e.FechaIngreso.Month, e.FechaIngreso.Day);
+        estadoBool = e.Estado ?? true;
+        mostrarFormulario = true;
+    }
+
+    async Task Guardar()
+    {
+        empleadoActual.FechaIngreso = DateOnly.FromDateTime(fechaIngreso);
+        empleadoActual.Estado = estadoBool;
+
+        bool ok = empleadoActual.IdEmpleado == 0
+            ? await EmpleadoService.CreateAsync(empleadoActual)
+            : await EmpleadoService.UpdateAsync(empleadoActual);
+
+        if (ok)
+        {
+            empleados = await EmpleadoService.GetAllAsync();
+            mostrarFormulario = false;
+        }
+    }
+
+    void Cancelar() => mostrarFormulario = false;
+
+    async Task Eliminar(int id)
+    {
+        if (await EmpleadoService.DeleteAsync(id))
+        {
+            empleados = await EmpleadoService.GetAllAsync();
+        }
+    }
+}

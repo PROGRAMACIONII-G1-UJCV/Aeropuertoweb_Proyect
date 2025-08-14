@@ -39,7 +39,7 @@ public partial class Boleto
     public string? CodigoReserva { get; set; }
 
     [InverseProperty("IdBoletoNavigation")]
-    public virtual ICollection<Equipaje> Equipajes { get; set; } = new List<Equipaje>();
+    public virtual ICollection<Equipaje> Equipajes { get; set; } = [];
 
     [ForeignKey("IdPasajero")]
     [InverseProperty("Boletos")]

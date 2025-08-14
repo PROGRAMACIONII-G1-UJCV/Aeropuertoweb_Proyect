@@ -20,9 +20,13 @@ builder.Services.AddHttpClient<AerolineaService, AerolineaService>(client =>
 // ✅ REGISTRO DE SERVICIOS PERSONALIZADOS
 builder.Services.AddScoped<IAeropuertoService, AeropuertoService>();
 builder.Services.AddScoped<IAvionService, AvionService>(); // 
-builder.Services.AddScoped<IAerolineaService, AerolineaService>(); 
-
-
+builder.Services.AddScoped<IAerolineaService, AerolineaService>();
+builder.Services.AddScoped<IBoletoService, BoletoService>();
+builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
+builder.Services.AddScoped<IEquipajeService, EquipajeService>();
+builder.Services.AddScoped<IMantenimientoService, MantenimientoService>();
+builder.Services.AddScoped<IPasajeroService, PasajeroService>();
+builder.Services.AddScoped<IPuertasEmbarqueService, PuertasEmbarqueServices>();
 
 
 

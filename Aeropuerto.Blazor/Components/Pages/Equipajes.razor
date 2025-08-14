@@ -1,0 +1,140 @@
+﻿@page "/equipajes"
+@inject IEquipajeService EquipajeService
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Gestión de Equipajes</h3>
+
+<button class="btn btn-primary mb-3" @onclick="Nuevo">Nuevo Equipaje</button>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Peso</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Hora Registro</th>
+            <th>Tipo</th>
+            <th>Ubicación</th>
+            <th>Observaciones</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in equipajes)
+        {
+            <tr>
+                <td>@e.Peso</td>
+                <td>@e.Descripcion</td>
+                <td>@e.Estado</td>
+                <td>@e.HoraRegistro.ToString("g")</td>
+                <td>@e.Tipo</td>
+                <td>@e.Ubicacion</td>
+                <td>@e.Observaciones</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" @onclick="() => Editar(e)">Editar</button>
+                    <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(e.IdEquipaje)">Eliminar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (mostrarFormulario)
+{
+    <EditForm Model="equipajeActual" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+        <div class="mb-2">
+            <label>Peso:</label>
+            <InputNumber class="form-control" @bind-Value="equipajeActual.Peso" />
+        </div>
+        <div class="mb-2">
+            <label>Descripción:</label>
+            <InputText class="form-control" @bind-Value="equipajeActual.Descripcion" />
+        </div>
+        <div class="mb-2">
+            <label>Estado:</label>
+            <InputText class="form-control" @bind-Value="equipajeActual.Estado" />
+        </div>
+        <div class="mb-2">
+            <label>Hora Registro:</label>
+            <InputDate class="form-control" @bind-Value="horaRegistro" />
+        </div>
+        <div class="mb-2">
+            <label>Tipo:</label>
+            <InputText class="form-control" @bind-Value="equipajeActual.Tipo" />
+        </div>
+        <div class="mb-2">
+            <label>Ubicación:</label>
+            <InputText class="form-control" @bind-Value="equipajeActual.Ubicacion" />
+        </div>
+        <div class="mb-2">
+            <label>Observaciones:</label>
+            <InputText class="form-control" @bind-Value="equipajeActual.Observaciones" />
+        </div>
+        <button class="btn btn-success" type="submit">Guardar</button>
+        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </EditForm>
+}
+
+@code {
+    List<Equipaje> equipajes = new();
+    Equipaje equipajeActual = new();
+    bool mostrarFormulario = false;
+    DateTime horaRegistro = DateTime.Now;
+
+    protected override async Task OnInitializedAsync()
+    {
+        equipajes = await EquipajeService.GetAllAsync();
+    }
+
+    void Nuevo()
+    {
+        equipajeActual = new Equipaje { Estado = "Registrado" };
+        horaRegistro = DateTime.Now;
+        mostrarFormulario = true;
+    }
+
+    void Editar(Equipaje e)
+    {
+        equipajeActual = new Equipaje
+        {
+            IdEquipaje = e.IdEquipaje,
+            IdBoleto = e.IdBoleto,
+            Peso = e.Peso,
+            Descripcion = e.Descripcion,
+            Estado = e.Estado,
+            HoraRegistro = e.HoraRegistro,
+            Tipo = e.Tipo,
+            Ubicacion = e.Ubicacion,
+            Observaciones = e.Observaciones
+        };
+        horaRegistro = e.HoraRegistro;
+        mostrarFormulario = true;
+    }
+
+    async Task Guardar()
+    {
+        equipajeActual.HoraRegistro = horaRegistro;
+
+        bool ok = equipajeActual.IdEquipaje == 0
+            ? await EquipajeService.CreateAsync(equipajeActual)
+            : await EquipajeService.UpdateAsync(equipajeActual);
+
+        if (ok)
+        {
+            equipajes = await EquipajeService.GetAllAsync();
+            mostrarFormulario = false;
+        }
+    }
+
+    void Cancelar() => mostrarFormulario = false;
+
+    async Task Eliminar(int id)
+    {
+        if (await EquipajeService.DeleteAsync(id))
+        {
+            equipajes = await EquipajeService.GetAllAsync();
+        }
+    }
+}

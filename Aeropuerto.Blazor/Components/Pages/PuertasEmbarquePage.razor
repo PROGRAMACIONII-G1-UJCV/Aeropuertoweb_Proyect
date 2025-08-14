@@ -1,0 +1,157 @@
+﻿@page "/puertas-embarque"
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+@inject IPuertasEmbarqueService PuertasService
+
+<h3>Puertas de Embarque</h3>
+
+@if (isLoading)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Número</th>
+                <th>Estado</th>
+                <th>Tipo</th>
+                <th>Capacidad</th>
+                <th>Piso</th>
+                <th>Observaciones</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var puerta in puertas)
+            {
+                <tr>
+                    <td>@puerta.IdPuerta</td>
+                    <td>@puerta.Numero</td>
+                    <td>@puerta.Estado</td>
+                    <td>@puerta.Tipo</td>
+                    <td>@puerta.Capacidad</td>
+                    <td>@puerta.Piso</td>
+                    <td>@puerta.Observaciones</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" @onclick="() => Editar(puerta)">Editar</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => Eliminar(puerta.IdPuerta)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <hr />
+
+    <h5>@(editando ? "Editar Puerta" : "Nueva Puerta")</h5>
+
+    <EditForm Model="puertaActual" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Número</label>
+            <InputText class="form-control" @bind-Value="puertaActual.Numero" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <InputText class="form-control" @bind-Value="puertaActual.Estado" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Tipo</label>
+            <InputText class="form-control" @bind-Value="puertaActual.Tipo" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Capacidad</label>
+            <InputNumber class="form-control" @bind-Value="puertaActual.Capacidad" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Piso</label>
+            <InputText class="form-control" @bind-Value="puertaActual.Piso" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Observaciones</label>
+            <InputTextArea class="form-control" @bind-Value="puertaActual.Observaciones" />
+        </div>
+
+        <button type="submit" class="btn btn-success me-2">Guardar</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </EditForm>
+}
+
+@code {
+    private List<PuertasEmbarque> puertas = new();
+    private PuertasEmbarque puertaActual = new();
+    private bool editando = false;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarPuertas();
+    }
+
+    private async Task CargarPuertas()
+    {
+        isLoading = true;
+        puertas = await PuertasService.GetAllAsync();
+        isLoading = false;
+    }
+
+    private void Editar(PuertasEmbarque puerta)
+    {
+        puertaActual = new PuertasEmbarque
+        {
+            IdPuerta = puerta.IdPuerta,
+            Numero = puerta.Numero,
+            Estado = puerta.Estado,
+            Tipo = puerta.Tipo,
+            Capacidad = puerta.Capacidad,
+            Piso = puerta.Piso,
+            Observaciones = puerta.Observaciones,
+            IdAeropuerto = puerta.IdAeropuerto
+        };
+        editando = true;
+    }
+
+    private async Task Guardar()
+    {
+        bool resultado;
+        if (editando)
+        {
+            resultado = await PuertasService.UpdateAsync(puertaActual);
+        }
+        else
+        {
+            resultado = await PuertasService.CreateAsync(puertaActual);
+        }
+
+        if (resultado)
+        {
+            await CargarPuertas();
+            Cancelar();
+        }
+    }
+
+    private async Task Eliminar(int id)
+    {
+        var confirmado = await PuertasService.DeleteAsync(id);
+        if (confirmado)
+        {
+            await CargarPuertas();
+        }
+    }
+
+    private void Cancelar()
+    {
+        puertaActual = new PuertasEmbarque();
+        editando = false;
+    }
+}

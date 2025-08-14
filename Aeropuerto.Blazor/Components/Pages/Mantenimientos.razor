@@ -1,0 +1,144 @@
+﻿@page "/mantenimientos"
+@inject IMantenimientoService MantenimientoService
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Registro de Mantenimientos</h3>
+
+<button class="btn btn-primary mb-3" @onclick="Nuevo">Nuevo Mantenimiento</button>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Descripción</th>
+            <th>Costo</th>
+            <th>Responsable</th>
+            <th>Estado</th>
+            <th>Próximo Servicio</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var m in mantenimientos)
+        {
+            <tr>
+                <td>@m.Fecha.ToString("yyyy-MM-dd")</td>
+                <td>@m.Tipo</td>
+                <td>@m.Descripcion</td>
+                <td>@m.Costo?.ToString("C")</td>
+                <td>@m.Responsable</td>
+                <td>@m.Estado</td>
+                <td>@(m.ProximoServicio?.ToString("yyyy-MM-dd") ?? "-")</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" @onclick="() => Editar(m)">Editar</button>
+                    <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(m.IdMantenimiento)">Eliminar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (mostrarFormulario)
+{
+    <EditForm Model="mantenimientoActual" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+        <div class="mb-2">
+            <label>Fecha:</label>
+            <InputDate class="form-control" @bind-Value="fecha" />
+        </div>
+        <div class="mb-2">
+            <label>Tipo:</label>
+            <InputText class="form-control" @bind-Value="mantenimientoActual.Tipo" />
+        </div>
+        <div class="mb-2">
+            <label>Descripción:</label>
+            <InputText class="form-control" @bind-Value="mantenimientoActual.Descripcion" />
+        </div>
+        <div class="mb-2">
+            <label>Costo:</label>
+            <InputNumber class="form-control" @bind-Value="mantenimientoActual.Costo" />
+        </div>
+        <div class="mb-2">
+            <label>Responsable:</label>
+            <InputText class="form-control" @bind-Value="mantenimientoActual.Responsable" />
+        </div>
+        <div class="mb-2">
+            <label>Estado:</label>
+            <InputText class="form-control" @bind-Value="mantenimientoActual.Estado" />
+        </div>
+        <div class="mb-2">
+            <label>Próximo Servicio:</label>
+            <InputDate class="form-control" @bind-Value="proximoServicio" />
+        </div>
+        <button class="btn btn-success" type="submit">Guardar</button>
+        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </EditForm>
+}
+
+@code {
+    List<Mantenimiento> mantenimientos = new();
+    Mantenimiento mantenimientoActual = new();
+    bool mostrarFormulario = false;
+    DateTime fecha = DateTime.Today;
+    DateTime? proximoServicio;
+
+    protected override async Task OnInitializedAsync()
+    {
+        mantenimientos = await MantenimientoService.GetAllAsync();
+    }
+
+    void Nuevo()
+    {
+        mantenimientoActual = new Mantenimiento { Estado = "Pendiente" };
+        fecha = DateTime.Today;
+        proximoServicio = null;
+        mostrarFormulario = true;
+    }
+
+    void Editar(Mantenimiento m)
+    {
+        mantenimientoActual = new Mantenimiento
+        {
+            IdMantenimiento = m.IdMantenimiento,
+            IdAvion = m.IdAvion,
+            Tipo = m.Tipo,
+            Descripcion = m.Descripcion,
+            Costo = m.Costo,
+            Responsable = m.Responsable,
+            Estado = m.Estado,
+            Fecha = m.Fecha,
+            ProximoServicio = m.ProximoServicio
+        };
+        fecha = DateTime.Parse(m.Fecha.ToString());
+        proximoServicio = m.ProximoServicio.HasValue ? DateTime.Parse(m.ProximoServicio.ToString()) : null;
+        mostrarFormulario = true;
+    }
+
+    async Task Guardar()
+    {
+        mantenimientoActual.Fecha = DateOnly.FromDateTime(fecha);
+        mantenimientoActual.ProximoServicio = proximoServicio.HasValue ? DateOnly.FromDateTime(proximoServicio.Value) : null;
+
+        bool ok = mantenimientoActual.IdMantenimiento == 0
+            ? await MantenimientoService.CreateAsync(mantenimientoActual)
+            : await MantenimientoService.UpdateAsync(mantenimientoActual);
+
+        if (ok)
+        {
+            mantenimientos = await MantenimientoService.GetAllAsync();
+            mostrarFormulario = false;
+        }
+    }
+
+    void Cancelar() => mostrarFormulario = false;
+
+    async Task Eliminar(int id)
+    {
+        if (await MantenimientoService.DeleteAsync(id))
+        {
+            mantenimientos = await MantenimientoService.GetAllAsync();
+        }
+    }
+}

@@ -1,0 +1,151 @@
+﻿@page "/pasajeros"
+@inject IPasajeroService PasajeroService
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Gestión de Pasajeros</h3>
+
+<button class="btn btn-primary mb-3" @onclick="Nuevo">Nuevo Pasajero</button>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Pasaporte</th>
+            <th>Nacionalidad</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Fecha Nacimiento</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in pasajeros)
+        {
+            <tr>
+                <td>@p.Nombre</td>
+                <td>@p.Apellido</td>
+                <td>@p.Pasaporte</td>
+                <td>@p.Nacionalidad</td>
+                <td>@p.Email</td>
+                <td>@p.Telefono</td>
+                <td>@p.FechaNacimiento.ToString("yyyy-MM-dd")</td>
+                <td>@(p.Estado == true ? "Activo" : "Inactivo")</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" @onclick="() => Editar(p)">Editar</button>
+                    <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(p.IdPasajero)">Eliminar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (mostrarFormulario)
+{
+    <EditForm Model="pasajeroActual" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+        <div class="mb-2">
+            <label>Nombre:</label>
+            <InputText class="form-control" @bind-Value="pasajeroActual.Nombre" />
+        </div>
+        <div class="mb-2">
+            <label>Apellido:</label>
+            <InputText class="form-control" @bind-Value="pasajeroActual.Apellido" />
+        </div>
+        <div class="mb-2">
+            <label>Pasaporte:</label>
+            <InputText class="form-control" @bind-Value="pasajeroActual.Pasaporte" />
+        </div>
+        <div class="mb-2">
+            <label>Nacionalidad:</label>
+            <InputText class="form-control" @bind-Value="pasajeroActual.Nacionalidad" />
+        </div>
+        <div class="mb-2">
+            <label>Email:</label>
+            <InputText class="form-control" @bind-Value="pasajeroActual.Email" />
+        </div>
+        <div class="mb-2">
+            <label>Teléfono:</label>
+            <InputText class="form-control" @bind-Value="pasajeroActual.Telefono" />
+        </div>
+        <div class="mb-2">
+            <label>Fecha Nacimiento:</label>
+            <InputDate class="form-control" @bind-Value="fechaNacimiento" />
+        </div>
+        <div class="form-check mb-2">
+            <InputCheckbox class="form-check-input" @bind-Value="estadoActivo" />
+            <label class="form-check-label">Activo</label>
+        </div>
+        <button class="btn btn-success" type="submit">Guardar</button>
+        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </EditForm>
+}
+
+@code {
+    List<Pasajero> pasajeros = new();
+    Pasajero pasajeroActual = new();
+    bool mostrarFormulario = false;
+    DateTime fechaNacimiento = DateTime.Today;
+    bool estadoActivo = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        pasajeros = await PasajeroService.GetAllAsync();
+    }
+
+    void Nuevo()
+    {
+        pasajeroActual = new Pasajero();
+        fechaNacimiento = DateTime.Today;
+        estadoActivo = true;
+        mostrarFormulario = true;
+    }
+
+    void Editar(Pasajero p)
+    {
+        pasajeroActual = new Pasajero
+        {
+            IdPasajero = p.IdPasajero,
+            Nombre = p.Nombre,
+            Apellido = p.Apellido,
+            Pasaporte = p.Pasaporte,
+            Nacionalidad = p.Nacionalidad,
+            Email = p.Email,
+            Telefono = p.Telefono,
+            FechaNacimiento = p.FechaNacimiento,
+            Estado = p.Estado
+        };
+        fechaNacimiento = DateTime.Parse(p.FechaNacimiento.ToString());
+        estadoActivo = p.Estado ?? false;
+        mostrarFormulario = true;
+    }
+
+    async Task Guardar()
+    {
+        pasajeroActual.FechaNacimiento = DateOnly.FromDateTime(fechaNacimiento);
+        pasajeroActual.Estado = estadoActivo;
+
+        bool ok = pasajeroActual.IdPasajero == 0
+            ? await PasajeroService.CreateAsync(pasajeroActual)
+            : await PasajeroService.UpdateAsync(pasajeroActual);
+
+        if (ok)
+        {
+            pasajeros = await PasajeroService.GetAllAsync();
+            mostrarFormulario = false;
+        }
+    }
+
+    void Cancelar() => mostrarFormulario = false;
+
+    async Task Eliminar(int id)
+    {
+        if (await PasajeroService.DeleteAsync(id))
+        {
+            pasajeros = await PasajeroService.GetAllAsync();
+        }
+    }
+
+}

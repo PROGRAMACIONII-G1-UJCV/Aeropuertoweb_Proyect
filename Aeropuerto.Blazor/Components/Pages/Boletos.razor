@@ -1,0 +1,129 @@
+﻿@page "/boletos"
+@inject IBoletoService BoletoService
+@using Aeropuerto.EntityModels
+@using Aeropuerto.Blazor.Services
+
+<h3>Gestión de Boletos</h3>
+
+<button class="btn btn-primary mb-3" @onclick="Nuevo">Nuevo Boleto</button>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Asiento</th>
+            <th>Precio</th>
+            <th>Fecha Compra</th>
+            <th>Estado</th>
+            <th>Forma Pago</th>
+            <th>Código Reserva</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var b in boletos)
+        {
+            <tr>
+                <td>@b.Asiento</td>
+                <td>@b.Precio</td>
+                <td>@b.FechaCompra.ToShortDateString()</td>
+                <td>@b.Estado</td>
+                <td>@b.FormaPago</td>
+                <td>@b.CodigoReserva</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" @onclick="() => Editar(b)">Editar</button>
+                    <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(b.IdBoleto)">Eliminar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (mostrarFormulario)
+{
+    <EditForm Model="boletoActual" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+        <div class="mb-2">
+            <label>Asiento:</label>
+            <InputText class="form-control" @bind-Value="boletoActual.Asiento" />
+        </div>
+        <div class="mb-2">
+            <label>Precio:</label>
+            <InputNumber class="form-control" @bind-Value="boletoActual.Precio" />
+        </div>
+        <div class="mb-2">
+            <label>Fecha Compra:</label>
+            <InputDate class="form-control" @bind-Value="boletoActual.FechaCompra" />
+        </div>
+        <div class="mb-2">
+            <label>Estado:</label>
+            <InputText class="form-control" @bind-Value="boletoActual.Estado" />
+        </div>
+        <div class="mb-2">
+            <label>Forma Pago:</label>
+            <InputText class="form-control" @bind-Value="boletoActual.FormaPago" />
+        </div>
+        <div class="mb-2">
+            <label>Código Reserva:</label>
+            <InputText class="form-control" @bind-Value="boletoActual.CodigoReserva" />
+        </div>
+        <button class="btn btn-success" type="submit">Guardar</button>
+        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </EditForm>
+}
+
+@code {
+    List<Boleto> boletos = new();
+    Boleto boletoActual = new();
+    bool mostrarFormulario = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        boletos = await BoletoService.GetAllAsync();
+    }
+
+    void Nuevo()
+    {
+        boletoActual = new Boleto { FechaCompra = DateTime.Now };
+        mostrarFormulario = true;
+    }
+
+    void Editar(Boleto b)
+    {
+        boletoActual = new Boleto
+        {
+            IdBoleto = b.IdBoleto,
+            Asiento = b.Asiento,
+            Precio = b.Precio,
+            FechaCompra = b.FechaCompra,
+            Estado = b.Estado,
+            FormaPago = b.FormaPago,
+            CodigoReserva = b.CodigoReserva
+        };
+        mostrarFormulario = true;
+    }
+
+    async Task Guardar()
+    {
+        bool ok;
+        if (boletoActual.IdBoleto == 0)
+            ok = await BoletoService.CreateAsync(boletoActual);
+        else
+            ok = await BoletoService.UpdateAsync(boletoActual);
+
+        if (ok)
+        {
+            boletos = await BoletoService.GetAllAsync();
+            mostrarFormulario = false;
+        }
+    }
+
+    void Cancelar() => mostrarFormulario = false;
+
+    async Task Eliminar(int id)
+    {
+        if (await BoletoService.DeleteAsync(id))
+        {
+            boletos = await BoletoService.GetAllAsync();
+        }
+    }
+}
