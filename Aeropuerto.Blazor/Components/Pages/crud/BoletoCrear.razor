@@ -1,0 +1,69 @@
+﻿@page "/crud/boletos/crear"
+@inject IBoletoService BoletoService
+@inject NavigationManager Navigation
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Nuevo Boleto</h3>
+
+<EditForm Model="boleto" OnValidSubmit="Guardar" FormName="CrearBoletoForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-2">
+        <label>Asiento:</label>
+        <InputText class="form-control" @bind-Value="boleto.Asiento" />
+    </div>
+    <div class="mb-2">
+        <label>Precio:</label>
+        <InputNumber class="form-control" @bind-Value="boleto.Precio" />
+    </div>
+    <div class="mb-2">
+        <label>Fecha Compra:</label>
+        <InputDate class="form-control" @bind-Value="boleto.FechaCompra" />
+    </div>
+
+    <!-- 🔽 Insertar aquí -->
+    <div class="mb-2">
+        <label>Vuelo:</label>
+        <InputNumber class="form-control" @bind-Value="boleto.IdVuelo" />
+    </div>
+    <div class="mb-2">
+        <label>Pasajero:</label>
+        <InputNumber class="form-control" @bind-Value="boleto.IdPasajero" />
+    </div>
+
+    <div class="mb-2">
+        <label>Estado:</label>
+        <InputText class="form-control" @bind-Value="boleto.Estado" />
+    </div>
+
+    <div class="mb-2">
+        <label>Forma Pago:</label>
+        <InputText class="form-control" @bind-Value="boleto.FormaPago" />
+    </div>
+    <div class="mb-2">
+        <label>Código Reserva:</label>
+        <InputText class="form-control" @bind-Value="boleto.CodigoReserva" />
+    </div>
+
+    <button class="btn btn-success me-2" type="submit">Guardar</button>
+    <button class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/boletos"))">Cancelar</button>
+</EditForm>
+
+@code {
+    Boleto boleto = new()
+    {
+        FechaCompra = DateTime.Now,
+        Estado = "Activo"
+    };
+
+    async Task Guardar()
+    {
+        bool ok = await BoletoService.CreateAsync(boleto);
+        if (ok)
+        {
+            Navigation.NavigateTo("/boletos");
+        }
+    }
+}

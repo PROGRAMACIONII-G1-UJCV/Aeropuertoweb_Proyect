@@ -1,0 +1,90 @@
+﻿@page "/crud/vuelos/eliminar/{IdVuelo:int}"
+@inject IVueloService VueloService
+@inject NavigationManager Navigation
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Eliminar Vuelo</h3>
+
+<p class="text-muted">Id: <strong>@IdVuelo</strong></p>
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger"><strong>Error:</strong> @error</div>
+}
+else if (cargando)
+{
+    <p>Cargando información del vuelo...</p>
+}
+else if (vuelo is not null)
+{
+    <div class="alert alert-warning">
+        <p>¿Estás seguro que deseas eliminar el vuelo <strong>@vuelo.NumeroVuelo</strong>?</p>
+        <button type="button" class="btn btn-danger me-2" @onclick="Confirmar" disabled="@eliminando">
+            <i class="bi bi-trash-fill"></i> @(eliminando ? "Eliminando..." : "Confirmar")
+        </button>
+        <button type="button" class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/vuelos"))" disabled="@eliminando">
+            Cancelar
+        </button>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">No se encontró el vuelo con Id @IdVuelo.</div>
+}
+
+@code {
+    [Parameter] public int IdVuelo { get; set; }
+
+    Vuelo? vuelo;
+    bool cargando;
+    bool eliminando;
+    string? error;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        cargando = true;
+        error = null;
+        try
+        {
+            Console.WriteLine($"[UI] Cargando vuelo Id={IdVuelo}");
+            vuelo = await VueloService.GetByIdAsync(IdVuelo);
+        }
+        catch (Exception ex)
+        {
+            error = $"Error cargando vuelo: {ex.Message}";
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    async Task Confirmar()
+    {
+        eliminando = true;
+        error = null;
+        try
+        {
+            Console.WriteLine($"[UI] Click Confirmar. Eliminando Id={IdVuelo}");
+            var ok = await VueloService.DeleteAsync(IdVuelo);
+            if (ok)
+            {
+                Console.WriteLine("[UI] Eliminado OK. Navegando a /vuelos");
+                Navigation.NavigateTo("/vuelos", forceLoad: true);
+            }
+            else
+            {
+                error = "No se pudo eliminar. Puede tener registros relacionados o la API devolvió un estado no exitoso.";
+            }
+        }
+        catch (Exception ex)
+        {
+            error = $"Error eliminando: {ex.Message}";
+        }
+        finally
+        {
+            eliminando = false;
+        }
+    }
+}

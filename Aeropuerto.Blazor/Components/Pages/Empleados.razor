@@ -5,7 +5,9 @@
 
 <h3>Gestión de Empleados</h3>
 
-<button class="btn btn-primary mb-3" @onclick="Nuevo">Nuevo Empleado</button>
+<NavLink class="btn btn-primary mb-3" href="/crud/empleados/crear">
+    <i class="bi bi-person-plus-fill"></i> Nuevo Empleado
+</NavLink>
 
 <table class="table table-striped">
     <thead>
@@ -34,8 +36,12 @@
                 <td>@e.Telefono</td>
                 <td>@(e.Estado == true ? "Activo" : "Inactivo")</td>
                 <td>
-                    <button class="btn btn-sm btn-outline-primary" @onclick="() => Editar(e)">Editar</button>
-                    <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(e.IdEmpleado)">Eliminar</button>
+                    <NavLink class="btn btn-sm btn-outline-primary me-1" href="@($"/crud/empleados/editar/{e.IdEmpleado}")">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </NavLink>
+                    <NavLink class="btn btn-sm btn-outline-danger" href="@($"/crud/empleados/eliminar/{e.IdEmpleado}")">
+                        <i class="bi bi-trash-fill"></i> Eliminar
+                    </NavLink>
                 </td>
             </tr>
         }

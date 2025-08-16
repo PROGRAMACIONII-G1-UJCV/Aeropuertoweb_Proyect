@@ -1,0 +1,82 @@
+﻿@page "/crud/vuelos/crear"
+@inject IVueloService VueloService
+@inject NavigationManager Navigation
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Nuevo Vuelo</h3>
+
+<EditForm Model="vuelo" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="row">
+        <div class="col-md-4 mb-2">
+            <label>Número Vuelo:</label>
+            <InputText class="form-control" @bind-Value="vuelo.NumeroVuelo" />
+        </div>
+        <div class="col-md-4 mb-2">
+            <label>Origen:</label>
+            <InputNumber class="form-control" @bind-Value="vuelo.IdAeropuertoOrigen" />
+        </div>
+        <div class="col-md-4 mb-2">
+            <label>Destino:</label>
+            <InputNumber class="form-control" @bind-Value="vuelo.IdAeropuertoDestino" />
+        </div>
+        <div class="col-md-4 mb-2">
+            <label>Avión:</label>
+            <InputNumber class="form-control" @bind-Value="vuelo.IdAvion" />
+        </div>
+        <div class="col-md-4 mb-2">
+            <label>Hora Salida:</label>
+            <InputDate class="form-control" @bind-Value="horaSalida" />
+        </div>
+        <div class="col-md-4 mb-2">
+            <label>Hora Llegada:</label>
+            <InputDate class="form-control" @bind-Value="horaLlegada" />
+        </div>
+        <div class="col-md-4 mb-2">
+            <label>Estado:</label>
+            <InputText class="form-control" @bind-Value="vuelo.Estado" />
+        </div>
+        <div class="col-md-4 mb-2">
+            <label>Precio:</label>
+            <InputNumber class="form-control" @bind-Value="vuelo.Precio" />
+        </div>
+        <div class="col-md-4 mb-2">
+            <label>Fecha Vuelo:</label>
+            <InputDate class="form-control" @bind-Value="fechaVuelo" />
+        </div>
+    </div>
+
+    <button class="btn btn-success me-2" type="submit">Guardar</button>
+    <button class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/vuelos"))">Cancelar</button>
+</EditForm>
+
+@code {
+    Vuelo vuelo = new()
+    {
+        Estado = "Programado",
+        NumeroVuelo = "",
+        IdAeropuertoOrigen = 1,
+        IdAeropuertoDestino = 2,
+        IdAvion = 1
+    };
+
+    DateTime horaSalida = DateTime.Now;
+    DateTime horaLlegada = DateTime.Now.AddHours(2);
+    DateTime fechaVuelo = DateTime.Today;
+
+    async Task Guardar()
+    {
+        vuelo.HoraSalida = horaSalida;
+        vuelo.HoraLlegada = horaLlegada;
+        vuelo.FechaVuelo = DateOnly.FromDateTime(fechaVuelo);
+
+        bool ok = await VueloService.CreateAsync(vuelo);
+        if (ok)
+        {
+            Navigation.NavigateTo("/vuelos");
+        }
+    }
+}

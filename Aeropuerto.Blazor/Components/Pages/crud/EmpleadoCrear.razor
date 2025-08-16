@@ -1,0 +1,42 @@
+﻿@page "/crud/empleados/crear"
+@inject IEmpleadoService EmpleadoService
+@inject NavigationManager Navigation
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Nuevo Empleado</h3>
+
+<EditForm Model="empleado" OnValidSubmit="Guardar" FormName="EmpleadoCrearForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-2"><label>Nombre:</label><InputText class="form-control" @bind-Value="empleado.Nombre" /></div>
+    <div class="mb-2"><label>Apellido:</label><InputText class="form-control" @bind-Value="empleado.Apellido" /></div>
+    <div class="mb-2"><label>Edad:</label><InputNumber class="form-control" @bind-Value="empleado.Edad" /></div>
+    <div class="mb-2"><label>Cargo:</label><InputText class="form-control" @bind-Value="empleado.Cargo" /></div>
+    <div class="mb-2"><label>Fecha Ingreso:</label><InputDate class="form-control" @bind-Value="fechaIngreso" /></div>
+    <div class="mb-2"><label>Email:</label><InputText class="form-control" @bind-Value="empleado.Email" /></div>
+    <div class="mb-2"><label>Teléfono:</label><InputText class="form-control" @bind-Value="empleado.Telefono" /></div>
+    <div class="mb-2"><label>Estado:</label><InputCheckbox class="form-check-input" @bind-Value="estadoBool" /></div>
+
+    <button class="btn btn-success me-2" type="submit">Guardar</button>
+    <button class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/empleados"))">Cancelar</button>
+</EditForm>
+
+@code {
+    Empleado empleado = new();
+    DateTime fechaIngreso = DateTime.Today;
+    bool estadoBool = true;
+
+    async Task Guardar()
+    {
+        empleado.FechaIngreso = DateOnly.FromDateTime(fechaIngreso);
+        empleado.Estado = estadoBool;
+
+        bool ok = await EmpleadoService.CreateAsync(empleado);
+        if (ok)
+        {
+            Navigation.NavigateTo("/empleados");
+        }
+    }
+}

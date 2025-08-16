@@ -67,14 +67,8 @@ public partial class AeropuertoContext : DbContext
 
         modelBuilder.Entity<Boleto>(entity =>
         {
-            entity.HasKey(e => e.IdBoleto).HasName("PK__Boletos__362F6EA043CF5C6C");
-
-            entity.HasOne(d => d.IdPasajeroNavigation).WithMany(p => p.Boletos)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Boletos__IdPasaj__6383C8BA");
-
             entity.HasOne(d => d.IdVueloNavigation).WithMany(p => p.Boletos)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade) // ✅ Esto permite eliminar el vuelo y sus boletos
                 .HasConstraintName("FK__Boletos__IdVuelo__628FA481");
         });
 

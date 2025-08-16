@@ -1,0 +1,174 @@
+﻿@page "/vuelos"
+@inject IVueloService VueloService
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Gestión de Vuelos</h3>
+
+<NavLink class="btn btn-primary mb-3" href="/crud/vuelos/crear">
+    <i class="bi bi-plus-circle-fill"></i> Nuevo Vuelo
+</NavLink>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Número</th>
+            <th>Origen</th>
+            <th>Destino</th>
+            <th>Avión</th>
+            <th>Salida</th>
+            <th>Llegada</th>
+            <th>Estado</th>
+            <th>Precio</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var v in vuelos)
+        {
+            <tr>
+                <td>@v.NumeroVuelo</td>
+                <td>@v.IdAeropuertoOrigen</td>
+                <td>@v.IdAeropuertoDestino</td>
+                <td>@v.IdAvion</td>
+                <td>@v.HoraSalida.ToString("HH:mm")</td>
+                <td>@v.HoraLlegada.ToString("HH:mm")</td>
+                <td>@v.Estado</td>
+                <td>@v.Precio?.ToString("C")</td>
+                <td>@v.FechaVuelo.ToString("yyyy-MM-dd")</td>
+                <td>
+                    <NavLink class="btn btn-sm btn-outline-primary me-1" href="@($"/crud/vuelos/editar/{v.IdVuelo}")">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </NavLink>
+                    <NavLink class="btn btn-sm btn-outline-danger" href="@($"/crud/vuelos/eliminar/{v.IdVuelo}")">
+                        <i class="bi bi-trash-fill"></i> Eliminar
+                    </NavLink>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@if (mostrarFormulario)
+{
+    <EditForm Model="vueloActual" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+        <div class="row">
+            <div class="col-md-4 mb-2">
+                <label>Número Vuelo:</label>
+                <InputText class="form-control" @bind-Value="vueloActual.NumeroVuelo" />
+            </div>
+            <div class="col-md-4 mb-2">
+                <label>Origen:</label>
+                <InputNumber class="form-control" @bind-Value="vueloActual.IdAeropuertoOrigen" />
+            </div>
+            <div class="col-md-4 mb-2">
+                <label>Destino:</label>
+                <InputNumber class="form-control" @bind-Value="vueloActual.IdAeropuertoDestino" />
+            </div>
+            <div class="col-md-4 mb-2">
+                <label>Avión:</label>
+                <InputNumber class="form-control" @bind-Value="vueloActual.IdAvion" />
+            </div>
+            <div class="col-md-4 mb-2">
+                <label>Hora Salida:</label>
+                <InputDate class="form-control" @bind-Value="horaSalida" />
+            </div>
+            <div class="col-md-4 mb-2">
+                <label>Hora Llegada:</label>
+                <InputDate class="form-control" @bind-Value="horaLlegada" />
+            </div>
+            <div class="col-md-4 mb-2">
+                <label>Estado:</label>
+                <InputText class="form-control" @bind-Value="vueloActual.Estado" />
+            </div>
+            <div class="col-md-4 mb-2">
+                <label>Precio:</label>
+                <InputNumber class="form-control" @bind-Value="vueloActual.Precio" />
+            </div>
+            <div class="col-md-4 mb-2">
+                <label>Fecha Vuelo:</label>
+                <InputDate class="form-control" @bind-Value="fechaVuelo" />
+            </div>
+        </div>
+        <button class="btn btn-success me-2" type="submit">Guardar</button>
+        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </EditForm>
+}
+
+@code {
+    List<Vuelo> vuelos = new();
+    Vuelo vueloActual = new();
+    bool mostrarFormulario = false;
+    DateTime horaSalida = DateTime.Now;
+    DateTime horaLlegada = DateTime.Now;
+    DateTime fechaVuelo = DateTime.Today;
+
+    protected override async Task OnInitializedAsync()
+    {
+        vuelos = await VueloService.GetAllAsync();
+    }
+
+    void Nuevo()
+    {
+        vueloActual = new Vuelo
+        {
+            Estado = "Programado",
+            NumeroVuelo = "",
+            IdAeropuertoOrigen = 1,
+            IdAeropuertoDestino = 2,
+            IdAvion = 1
+        };
+        horaSalida = DateTime.Now;
+        horaLlegada = DateTime.Now.AddHours(2);
+        fechaVuelo = DateTime.Today;
+        mostrarFormulario = true;
+    }
+
+    void Editar(Vuelo v)
+    {
+        vueloActual = new Vuelo
+        {
+            IdVuelo = v.IdVuelo,
+            NumeroVuelo = v.NumeroVuelo,
+            IdAeropuertoOrigen = v.IdAeropuertoOrigen,
+            IdAeropuertoDestino = v.IdAeropuertoDestino,
+            IdAvion = v.IdAvion,
+            Estado = v.Estado,
+            Precio = v.Precio
+        };
+        horaSalida = v.HoraSalida;
+        horaLlegada = v.HoraLlegada;
+        fechaVuelo = v.FechaVuelo.ToDateTime(TimeOnly.MinValue);
+        mostrarFormulario = true;
+    }
+
+    async Task Guardar()
+    {
+        vueloActual.HoraSalida = horaSalida;
+        vueloActual.HoraLlegada = horaLlegada;
+        vueloActual.FechaVuelo = DateOnly.FromDateTime(fechaVuelo);
+
+        bool ok = vueloActual.IdVuelo == 0
+            ? await VueloService.CreateAsync(vueloActual)
+            : await VueloService.UpdateAsync(vueloActual);
+
+        if (ok)
+        {
+            vuelos = await VueloService.GetAllAsync();
+            mostrarFormulario = false;
+        }
+    }
+
+    void Cancelar() => mostrarFormulario = false;
+
+    async Task Eliminar(int id)
+    {
+        if (await VueloService.DeleteAsync(id))
+        {
+            vuelos = await VueloService.GetAllAsync();
+        }
+    }
+}

@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
 using Aeropuerto.EntityModels;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Aeropuerto.WebApi.Controllers
 {
@@ -49,16 +50,26 @@ namespace Aeropuerto.WebApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            var vuelo = _context.Vuelos.Find(id);
-            if (vuelo == null)
-                return NotFound();
+        
 
+        [HttpDelete("{id:int}")]
+    public IActionResult Delete(int id)
+    {
+        var vuelo = _context.Vuelos.Find(id);
+        if (vuelo == null) return NotFound();
+
+        try
+        {
             _context.Vuelos.Remove(vuelo);
             _context.SaveChanges();
             return NoContent();
         }
+        catch (DbUpdateException)
+        {
+            return Conflict(new { message = "No se puede eliminar el vuelo porque tiene registros relacionados." });
+        }
     }
+
+
+}
 }

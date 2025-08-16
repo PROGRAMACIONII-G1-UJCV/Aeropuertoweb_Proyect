@@ -27,6 +27,8 @@ builder.Services.AddScoped<IEquipajeService, EquipajeService>();
 builder.Services.AddScoped<IMantenimientoService, MantenimientoService>();
 builder.Services.AddScoped<IPasajeroService, PasajeroService>();
 builder.Services.AddScoped<IPuertasEmbarqueService, PuertasEmbarqueServices>();
+builder.Services.AddScoped<IVueloService, VueloService>();
+
 
 
 

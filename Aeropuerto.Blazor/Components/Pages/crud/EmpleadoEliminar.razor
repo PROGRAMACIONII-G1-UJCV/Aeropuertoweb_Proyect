@@ -1,0 +1,39 @@
+﻿@page "/crud/empleados/eliminar/{IdEmpleado:int}"
+@inject IEmpleadoService EmpleadoService
+@inject NavigationManager Navigation
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Eliminar Empleado</h3>
+
+@if (empleado != null)
+{
+    <div class="alert alert-warning">
+        ¿Estás seguro que deseas eliminar al empleado <strong>@empleado.Nombre @empleado.Apellido</strong>?
+        <br />
+        <button class="btn btn-danger me-2" @onclick="Confirmar">Sí, eliminar</button>
+        <button class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/empleados"))">Cancelar</button>
+    </div>
+}
+else
+{
+    <p>Cargando empleado...</p>
+}
+
+@code {
+    [Parameter] public int IdEmpleado { get; set; }
+    Empleado? empleado;
+
+    protected override async Task OnInitializedAsync()
+    {
+        empleado = await EmpleadoService.GetByIdAsync(IdEmpleado);
+    }
+
+    async Task Confirmar()
+    {
+        if (await EmpleadoService.DeleteAsync(IdEmpleado))
+        {
+            Navigation.NavigateTo("/empleados");
+        }
+    }
+}

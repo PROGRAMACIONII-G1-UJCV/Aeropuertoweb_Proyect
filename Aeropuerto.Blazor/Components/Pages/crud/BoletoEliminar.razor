@@ -1,0 +1,39 @@
+﻿@page "/crud/boletos/eliminar/{IdBoleto:int}"
+@inject IBoletoService BoletoService
+@inject NavigationManager Navigation
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Eliminar Boleto</h3>
+
+@if (boleto != null)
+{
+    <div class="alert alert-warning">
+        ¿Estás seguro que deseas eliminar el boleto con asiento <strong>@boleto.Asiento</strong>?
+        <br />
+        <button class="btn btn-danger me-2" @onclick="Confirmar">Sí, eliminar</button>
+        <button class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/boletos"))">Cancelar</button>
+    </div>
+}
+else
+{
+    <p>Cargando boleto...</p>
+}
+
+@code {
+    [Parameter] public int IdBoleto { get; set; }
+    Boleto? boleto;
+
+    protected override async Task OnInitializedAsync()
+    {
+        boleto = await BoletoService.GetByIdAsync(IdBoleto);
+    }
+
+    async Task Confirmar()
+    {
+        if (await BoletoService.DeleteAsync(IdBoleto))
+        {
+            Navigation.NavigateTo("/boletos");
+        }
+    }
+}

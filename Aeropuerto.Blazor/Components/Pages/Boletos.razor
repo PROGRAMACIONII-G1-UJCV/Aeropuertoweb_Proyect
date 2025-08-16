@@ -5,7 +5,10 @@
 
 <h3>Gestión de Boletos</h3>
 
-<button class="btn btn-primary mb-3" @onclick="Nuevo">Nuevo Boleto</button>
+<NavLink class="btn btn-primary mb-3" href="/crud/boletos/crear">
+    <i class="bi bi-plus-circle-fill"></i> Nuevo Boleto
+</NavLink>
+
 
 <table class="table table-striped">
     <thead>
@@ -30,8 +33,12 @@
                 <td>@b.FormaPago</td>
                 <td>@b.CodigoReserva</td>
                 <td>
-                    <button class="btn btn-sm btn-outline-primary" @onclick="() => Editar(b)">Editar</button>
-                    <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(b.IdBoleto)">Eliminar</button>
+                    <NavLink class="btn btn-sm btn-outline-primary me-1" href="@($"/crud/boletos/editar/{b.IdBoleto}")">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </NavLink>
+                    <NavLink class="btn btn-sm btn-outline-danger" href="@($"/crud/boletos/eliminar/{b.IdBoleto}")">
+                        <i class="bi bi-trash-fill"></i> Eliminar
+                    </NavLink>
                 </td>
             </tr>
         }

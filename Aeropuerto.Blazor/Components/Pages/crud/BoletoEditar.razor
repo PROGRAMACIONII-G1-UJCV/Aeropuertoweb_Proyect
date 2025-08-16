@@ -1,0 +1,66 @@
+﻿@page "/crud/boletos/editar/{IdBoleto:int}"
+@inject IBoletoService BoletoService
+@inject NavigationManager Navigation
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Editar Boleto</h3>
+
+@if (boleto != null)
+{
+    <EditForm Model="boleto" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <!-- mismos campos que en crear -->
+        <div class="mb-2">
+            <label>Asiento:</label>
+            <InputText class="form-control" @bind-Value="boleto.Asiento" />
+        </div>
+        <div class="mb-2">
+            <label>Precio:</label>
+            <InputNumber class="form-control" @bind-Value="boleto.Precio" />
+        </div>
+        <div class="mb-2">
+            <label>Fecha Compra:</label>
+            <InputDate class="form-control" @bind-Value="boleto.FechaCompra" />
+        </div>
+        <div class="mb-2">
+            <label>Estado:</label>
+            <InputText class="form-control" @bind-Value="boleto.Estado" />
+        </div>
+        <div class="mb-2">
+            <label>Forma Pago:</label>
+            <InputText class="form-control" @bind-Value="boleto.FormaPago" />
+        </div>
+        <div class="mb-2">
+            <label>Código Reserva:</label>
+            <InputText class="form-control" @bind-Value="boleto.CodigoReserva" />
+        </div>
+
+        <button class="btn btn-success me-2" type="submit">Guardar</button>
+        <button class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/boletos"))">Cancelar</button>
+    </EditForm>
+}
+else
+{
+    <p>Cargando boleto...</p>
+}
+
+@code {
+    [Parameter] public int IdBoleto { get; set; }
+    Boleto? boleto;
+
+    protected override async Task OnInitializedAsync()
+    {
+        boleto = await BoletoService.GetByIdAsync(IdBoleto);
+    }
+
+    async Task Guardar()
+    {
+        if (boleto != null && await BoletoService.UpdateAsync(boleto))
+        {
+            Navigation.NavigateTo("/boletos");
+        }
+    }
+}

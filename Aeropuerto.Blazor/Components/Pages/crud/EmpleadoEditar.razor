@@ -1,0 +1,64 @@
+﻿@page "/crud/empleados/editar/{IdEmpleado:int}"
+@inject IEmpleadoService EmpleadoService
+@inject NavigationManager Navigation
+@using Aeropuerto.Blazor.Services
+@using Aeropuerto.EntityModels
+
+<h3>Editar Empleado</h3>
+
+@if (empleado != null)
+{
+    <EditForm Model="empleado" OnValidSubmit="Guardar" FormName="EmpleadoEditarForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <!-- mismos campos que en crear -->
+        <div class="mb-2"><label>Nombre:</label><InputText class="form-control" @bind-Value="empleado.Nombre" /></div>
+        <div class="mb-2"><label>Apellido:</label><InputText class="form-control" @bind-Value="empleado.Apellido" /></div>
+        <div class="mb-2"><label>Edad:</label><InputNumber class="form-control" @bind-Value="empleado.Edad" /></div>
+        <div class="mb-2"><label>Cargo:</label><InputText class="form-control" @bind-Value="empleado.Cargo" /></div>
+        <div class="mb-2"><label>Fecha Ingreso:</label><InputDate class="form-control" @bind-Value="fechaIngreso" /></div>
+        <div class="mb-2"><label>Email:</label><InputText class="form-control" @bind-Value="empleado.Email" /></div>
+        <div class="mb-2"><label>Teléfono:</label><InputText class="form-control" @bind-Value="empleado.Telefono" /></div>
+        <div class="mb-2"><label>Estado:</label><InputCheckbox class="form-check-input" @bind-Value="estadoBool" /></div>
+
+        <button class="btn btn-success me-2" type="submit">Guardar</button>
+        <button class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/empleados"))">Cancelar</button>
+    </EditForm>
+}
+else
+{
+    <p>Cargando empleado...</p>
+}
+
+@code {
+    [Parameter] public int IdEmpleado { get; set; }
+    Empleado? empleado;
+    DateTime fechaIngreso = DateTime.Today;
+    bool estadoBool = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        empleado = await EmpleadoService.GetByIdAsync(IdEmpleado);
+        if (empleado != null)
+        {
+            fechaIngreso = empleado.FechaIngreso.ToDateTime(TimeOnly.MinValue);
+            estadoBool = empleado.Estado ?? true;
+        }
+    }
+
+    async Task Guardar()
+    {
+        if (empleado != null)
+        {
+            empleado.FechaIngreso = DateOnly.FromDateTime(fechaIngreso);
+            empleado.Estado = estadoBool;
+
+            bool ok = await EmpleadoService.UpdateAsync(empleado);
+            if (ok)
+            {
+                Navigation.NavigateTo("/empleados");
+            }
+        }
+    }
+}
